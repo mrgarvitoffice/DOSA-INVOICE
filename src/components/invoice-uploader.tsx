@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import Image from 'next/image';
 import { UploadCloud, File as FileIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -88,40 +88,42 @@ export default function InvoiceUploader({ onFilesChange, previewUrls, isProcessi
       </AnimatePresence>
 
       {hasPreviews ? (
-        <Carousel className="w-full h-full p-0 md:p-6">
-          <CarouselContent>
-            {previewUrls.map((url, index) => {
-              const isImage = !url.endsWith('.pdf') && !url.startsWith('blob:application/pdf');
-               return (
-                <CarouselItem key={index}>
-                    <div className="relative w-full h-[300px] md:h-[calc(100vh-20rem)]">
-                        {isImage ? (
-                            <Image
-                                src={url}
-                                alt={`Invoice Preview ${index + 1}`}
-                                fill
-                                style={{ objectFit: 'contain' }}
-                                className="rounded-md"
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground bg-muted/30 rounded-md">
-                                <FileIcon className="w-24 h-24 mb-4" />
-                                <p className="text-lg font-medium">PDF file uploaded</p>
-                                <p className="text-sm">Preview is not available for PDFs.</p>
-                            </div>
-                        )}
-                    </div>
-                </CarouselItem>
-              )
-            })}
-          </CarouselContent>
-          {previewUrls.length > 1 && (
-            <>
-                <CarouselPrevious className="absolute left-0 md:left-[-1rem] top-1/2 -translate-y-1/2" />
-                <CarouselNext className="absolute right-0 md:right-[-1rem] top-1/2 -translate-y-1/2" />
-            </>
-          )}
-        </Carousel>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Carousel className="w-full h-full p-0 md:p-6">
+            <CarouselContent>
+              {previewUrls.map((url, index) => {
+                const isImage = !url.endsWith('.pdf') && !url.startsWith('blob:application/pdf');
+                 return (
+                  <CarouselItem key={index}>
+                      <div className="relative w-full h-[300px] md:h-[calc(100vh-20rem)]">
+                          {isImage ? (
+                              <Image
+                                  src={url}
+                                  alt={`Invoice Preview ${index + 1}`}
+                                  fill
+                                  style={{ objectFit: 'contain' }}
+                                  className="rounded-md"
+                              />
+                          ) : (
+                              <div className="flex flex-col items-center justify-center h-full text-muted-foreground bg-muted/30 rounded-md">
+                                  <FileIcon className="w-24 h-24 mb-4" />
+                                  <p className="text-lg font-medium">PDF file uploaded</p>
+                                  <p className="text-sm">Preview is not available for PDFs.</p>
+                              </div>
+                          )}
+                      </div>
+                  </CarouselItem>
+                )
+              })}
+            </CarouselContent>
+            {previewUrls.length > 1 && (
+              <>
+                  <CarouselPrevious className="absolute left-0 md:left-[-1rem] top-1/2 -translate-y-1/2" />
+                  <CarouselNext className="absolute right-0 md:right-[-1rem] top-1/2 -translate-y-1/2" />
+              </>
+            )}
+          </Carousel>
+        </Suspense>
       ) : (
         <label htmlFor="file-upload" className="flex h-full w-full cursor-pointer flex-col items-center justify-center text-center text-muted-foreground hover:text-primary">
             <UploadCloud className="h-12 w-12 mb-4" />
