@@ -170,7 +170,10 @@ export default function Home() {
   };
 
   const triggerFileSelect = () => {
-    fileInputRef.current?.click();
+    const inputRef = fileInputRef.current;
+    if (inputRef) {
+      inputRef.click();
+    }
   };
 
   return (
@@ -237,23 +240,7 @@ export default function Home() {
 
         {/* Mobile Action Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border p-3">
-             <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleMobileFileChange}
-                className="hidden"
-                ref={mobileFileInputRef}
-                multiple
-            />
             <div className="flex justify-around items-center gap-3">
-                <Button 
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => mobileFileInputRef.current?.click()}
-                >
-                    <FileUp className="mr-2 h-4 w-4" />
-                    Upload
-                </Button>
                 <Button 
                     variant="outline"
                     className="flex-1"
