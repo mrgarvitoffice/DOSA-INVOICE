@@ -7,9 +7,10 @@ import { ThemeSwitcher } from './theme-switcher';
 interface AppHeaderProps {
   onSaveToSheet: () => void;
   onNewInvoice: () => void;
+  onExportToCsv: () => void;
 }
 
-export default function AppHeader({ onSaveToSheet, onNewInvoice }: AppHeaderProps) {
+export default function AppHeader({ onSaveToSheet, onNewInvoice, onExportToCsv }: AppHeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm">
@@ -30,6 +31,15 @@ export default function AppHeader({ onSaveToSheet, onNewInvoice }: AppHeaderProp
               >
                 <FileX2 className="mr-2 h-4 w-4" />
                 <span>New Invoice</span>
+              </Button>
+               <Button
+                variant="outline"
+                size="sm"
+                onClick={onExportToCsv}
+                aria-label="Export to CSV"
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                <span>Export CSV</span>
               </Button>
               <Button
                 onClick={onSaveToSheet}

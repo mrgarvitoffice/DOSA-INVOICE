@@ -7,7 +7,7 @@ import InvoiceUploader from '@/components/invoice-uploader';
 import InvoiceTable from '@/components/invoice-table';
 import AppHeader from '@/components/header';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, FileUp, Sheet } from "lucide-react";
+import { Loader2, Plus, FileUp, Sheet, FileDown } from "lucide-react";
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { extractInvoiceData } from '@/lib/actions';
@@ -151,6 +151,22 @@ export default function Home() {
         }
     });
   };
+  
+  const handleExportToCsv = () => {
+    if (invoiceItems.every(item => !item.name)) {
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "Cannot export an empty invoice.",
+      });
+      return;
+    }
+    exportToCsv(invoiceItems, `invoice-data-${new Date().toISOString()}.csv`);
+    toast({
+      title: "Export Successful",
+      description: "Your invoice data has been exported to CSV.",
+    });
+  };
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -158,7 +174,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <AppHeader onSaveToSheet={handleSaveToSheet} onNewInvoice={handleReset} />
+      <AppHeader onSaveToSheet={handleSaveToSheet} onNewInvoice={handleReset} onExportToCsv={handleExportToCsv} />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 mb-20 lg:mb-0">
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
           
@@ -235,7 +251,15 @@ export default function Home() {
                     onClick={() => mobileFileInputRef.current?.click()}
                 >
                     <FileUp className="mr-2 h-4 w-4" />
-                    Upload Invoice
+                    Upload
+                </Button>
+                <Button 
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleExportToCsv}
+                >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Export
                 </Button>
                 <Button 
                     className="flex-1"
@@ -243,7 +267,7 @@ export default function Home() {
                     disabled={isSaving}
                 >
                     <Sheet className="mr-2 h-4 w-4" />
-                    {isSaving ? "Saving..." : "Save to Sheet"}
+                    {isSaving ? "Saving..." : "Save"}
                 </Button>
             </div>
         </div>
