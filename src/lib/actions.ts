@@ -19,13 +19,11 @@ export async function extractInvoiceData(formData: FormData): Promise<{ data?: E
 
   const fileBuffer = await file.arrayBuffer();
   const fileContentBase64 = Buffer.from(fileBuffer).toString('base64');
+  const invoiceDataUri = `data:${file.type};base64,${fileContentBase64}`;
 
   try {
     const result = await extractInvoice({
-      file: {
-        content: fileContentBase64,
-        contentType: file.type,
-      },
+      invoiceDataUri: invoiceDataUri,
     });
 
     if (!result || !Array.isArray(result.items)) {

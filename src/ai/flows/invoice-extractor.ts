@@ -12,10 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const InvoiceInputSchema = z.object({
-  file: z.object({
-    content: z.string().describe("A Base64 encoded string of the invoice file content."),
-    contentType: z.string().describe("The MIME type of the invoice file."),
-  }),
+  invoiceDataUri: z.string().describe("A data URI of the invoice file (e.g., 'data:image/png;base64,...')."),
 });
 export type InvoiceInput = z.infer<typeof InvoiceInputSchema>;
 
@@ -37,7 +34,7 @@ const extractionPrompt = ai.definePrompt({
     prompt: `You are an expert at extracting structured data from documents.
     Extract the line items from the provided invoice file.
     
-    Invoice: {{media url=(concat "data:" file.contentType ";base64," file.content)}}
+    Invoice: {{media url=invoiceDataUri}}
     `,
 });
 
