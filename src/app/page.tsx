@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useRef } from 'react';
 import type { InvoiceItem } from '@/lib/definitions';
-import { extractInvoiceData } from '@/lib/actions';
 import { exportToCsv } from '@/lib/utils';
 import InvoiceUploader from '@/components/invoice-uploader';
 import InvoiceTable from '@/components/invoice-table';
@@ -11,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, FileUp } from "lucide-react";
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { extractInvoiceData } from '@/lib/actions';
 
 const createEmptyRow = (): InvoiceItem => ({
   id: crypto.randomUUID(),
@@ -24,6 +24,7 @@ export default function Home() {
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([createEmptyRow()]);
   const [previewUrls, setPreviewUrls] = useState<{url: string, file: File}[]>([]);
   const [isExtracting, startExtraction] = useTransition();
+  const [isSaving, startSaving] = useTransition();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,38 +102,54 @@ export default function Home() {
     });
   };
 
-  const handleExport = () => {
+  const handleSaveToSheet = () => {
     if (invoiceItems.every(item => !item.name)) {
       toast({
         variant: "destructive",
-        title: "Export Failed",
-        description: "Cannot export an empty invoice.",
+        title: "Save Failed",
+        description: "Cannot save an empty invoice.",
       });
       return;
     }
-    const storeName = "DosaStore"; // Placeholder
-    const date = new Date().toISOString().split('T')[0];
-    const filename = `Invoice_Data_${date}.csv`;
-    exportToCsv(invoiceItems, filename);
-    toast({
-      style: {
-        backgroundColor: 'hsl(var(--accent))',
-        color: 'hsl(var(--accent-foreground))',
-        border: '1px solid hsl(var(--accent-foreground) / 0.2)',
-      },
-      title: "Export Successful",
-      description: `${filename} has been downloaded.`,
+    
+    startSaving(async () => {
+        try {
+            const response = await fetch('/api/save-to-sheet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ items: invoiceItems }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save to Google Sheet.');
+            }
+
+            const result = await response.json();
+            toast({
+                title: "Save Successful",
+                description: "Your data has been saved to Google Sheets.",
+            });
+
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "An error occurred",
+                description: error.message || "Could not save data to Google Sheets. Make sure your backend is running.",
+            });
+        }
     });
   };
 
   const triggerFileSelect = () => {
-    // For mobile FAB, there might be a different input ref if you implement that
     fileInputRef.current?.click();
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <AppHeader onExport={handleExport} onNewInvoice={handleReset} />
+      <AppHeader onSaveToSheet={handleSaveToSheet} onNewInvoice={handleReset} />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6">
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
           
@@ -160,29 +177,33 @@ export default function Home() {
                 </>
               )}
             </div>
-            <Card className="shadow-lg h-auto">
-              <CardContent className="p-2">
-                <InvoiceUploader 
-                  onFilesChange={handleFilesChange} 
-                  previewUrls={previewUrls.map(item => item.url)}
-                  isProcessing={isExtracting}
-                />
-              </CardContent>
+             <Card className="shadow-lg h-auto lg:max-h-[calc(100vh-12rem)] overflow-hidden">
+                <CardContent className="p-2 h-full">
+                    <div className="h-full overflow-auto">
+                        <InvoiceUploader 
+                            onFilesChange={handleFilesChange} 
+                            previewUrls={previewUrls.map(item => item.url)}
+                            isProcessing={isExtracting}
+                        />
+                    </div>
+                </CardContent>
             </Card>
           </div>
 
           <div className="lg:col-span-3">
              <div className="flex items-center justify-between mb-4 h-9">
                <h2 className="text-xl md:text-2xl font-bold tracking-tight">Extracted Data</h2>
-               {isExtracting && <Loader2 className="animate-spin text-primary" />}
+               {(isExtracting || isSaving) && <Loader2 className="animate-spin text-primary" />}
              </div>
-            <Card className="shadow-lg">
-              <CardContent className="p-0">
-                <InvoiceTable 
-                  items={invoiceItems} 
-                  setItems={setInvoiceItems}
-                  isProcessing={isExtracting}
-                />
+            <Card className="shadow-lg lg:max-h-[calc(100vh-12rem)] overflow-hidden">
+              <CardContent className="p-0 h-full">
+                <div className="h-full overflow-auto">
+                  <InvoiceTable 
+                    items={invoiceItems} 
+                    setItems={setInvoiceItems}
+                    isProcessing={isExtracting}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -195,7 +216,7 @@ export default function Home() {
               accept="image/*,.pdf"
               onChange={(e) => {
                   if (e.target.files) {
-                    handleFilesChange(Array.from(e.target.files));
+                    processFiles(Array.from(e.target.files), previewUrls.length > 0);
                     e.target.value = ''; // Reset file input
                   }
               }}
@@ -209,7 +230,7 @@ export default function Home() {
               onClick={() => document.getElementById('mobile-file-upload')?.click()}
               aria-label="Upload invoice"
             >
-              <FileUp className="h-6 w-6" />
+              {previewUrls.length > 0 ? <Plus className="h-6 w-6" /> : <FileUp className="h-6 w-6" />}
             </Button>
           </div>
       </main>

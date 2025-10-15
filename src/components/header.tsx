@@ -1,15 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { FileDown, FileX2 } from 'lucide-react';
+import { FileDown, FileX2, Sheet } from 'lucide-react';
 import { Logo } from './icons';
 import { ThemeSwitcher } from './theme-switcher';
 
 interface AppHeaderProps {
-  onExport: () => void;
+  onSaveToSheet: () => void;
   onNewInvoice: () => void;
 }
 
-export default function AppHeader({ onExport, onNewInvoice }: AppHeaderProps) {
+export default function AppHeader({ onSaveToSheet, onNewInvoice }: AppHeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm">
@@ -31,13 +31,13 @@ export default function AppHeader({ onExport, onNewInvoice }: AppHeaderProps) {
               <span className="hidden sm:inline">New Invoice</span>
             </Button>
             <Button
-              onClick={onExport}
+              onClick={onSaveToSheet}
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              aria-label="Export to CSV"
+              aria-label="Save to Google Sheet"
             >
-              <FileDown className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <Sheet className="mr-0 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Save to Sheet</span>
             </Button>
             <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block" />
             <ThemeSwitcher />

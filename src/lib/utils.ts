@@ -37,10 +37,11 @@ export function exportToCsv(items: InvoiceItem[], filename: string) {
     }
   });
   groupedItems.push(currentGroup);
-
+  
+  let serialNumberOffset = 0;
   groupedItems.forEach((group, groupIndex) => {
     if (group.heading) {
-      if (groupIndex > 0) {
+      if (csvRows.length > 0) {
         csvRows.push(''); // Add an empty row for spacing
       }
       csvRows.push(`"${group.heading.name.toUpperCase()}"`);
@@ -51,7 +52,7 @@ export function exportToCsv(items: InvoiceItem[], filename: string) {
       group.items.forEach((item, itemIndex) => {
         const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
         const row = [
-          itemIndex + 1,
+          serialNumberOffset + itemIndex + 1,
           escapeCsvCell(item.name),
           item.quantity,
           escapeCsvCell(item.unit),
@@ -60,6 +61,7 @@ export function exportToCsv(items: InvoiceItem[], filename: string) {
         ].join(',');
         csvRows.push(row);
       });
+      serialNumberOffset += group.items.length;
     }
   });
 
