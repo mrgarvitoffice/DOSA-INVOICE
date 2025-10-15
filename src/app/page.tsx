@@ -176,7 +176,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader onSaveToSheet={handleSaveToSheet} onNewInvoice={handleReset} onExportToCsv={handleExportToCsv} />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:pb-8 pb-40">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:pb-8 pb-28">
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
           
           <div className="lg:col-span-2 space-y-4 lg:sticky lg:top-20">
@@ -236,7 +236,7 @@ export default function Home() {
         </div>
 
         {/* Mobile Action Bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border p-3 space-y-3">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border p-3">
              <input
                 type="file"
                 accept="image/*,.pdf"
@@ -252,7 +252,7 @@ export default function Home() {
                     onClick={() => mobileFileInputRef.current?.click()}
                 >
                     <FileUp className="mr-2 h-4 w-4" />
-                    Upload Invoice
+                    Upload
                 </Button>
                 <Button 
                     variant="outline"
@@ -260,18 +260,17 @@ export default function Home() {
                     onClick={handleExportToCsv}
                 >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Export CSV
+                    Export
+                </Button>
+                 <Button 
+                    className="flex-1"
+                    onClick={handleSaveToSheet}
+                    disabled={isSaving}
+                >
+                    <Sheet className="mr-2 h-4 w-4" />
+                    {isSaving ? "Saving..." : "Save"}
                 </Button>
             </div>
-            <Button 
-                className="w-full"
-                size="lg"
-                onClick={handleSaveToSheet}
-                disabled={isSaving}
-            >
-                <Sheet className="mr-2 h-4 w-4" />
-                {isSaving ? "Saving..." : "Save to Sheet"}
-            </Button>
         </div>
       </main>
     </div>
