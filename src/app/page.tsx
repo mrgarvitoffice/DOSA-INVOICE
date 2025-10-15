@@ -21,22 +21,21 @@ const createEmptyRow = (): InvoiceItem => ({
 
 export default function Home() {
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([createEmptyRow()]);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isExtracting, startExtraction] = useTransition();
   const { toast } = useToast();
 
-  const handleFileChange = (file: File | null) => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+  const handleFilesChange = (files: File[]) => {
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
     
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+    if (files.length > 0) {
+      const urls = files.map(file => URL.createObjectURL(file));
+      setPreviewUrls(urls);
 
       startExtraction(async () => {
         const formData = new FormData();
-        formData.append('invoice', file);
+        files.forEach(file => formData.append('invoices', file));
+        
         try {
           const result = await extractInvoiceData(formData);
           if (result.error) {
@@ -51,7 +50,7 @@ export default function Home() {
             setInvoiceItems(itemsWithIds.length > 0 ? itemsWithIds : [createEmptyRow()]);
             toast({
               title: "Extraction Complete",
-              description: "Invoice data has been pre-filled.",
+              description: `Extracted ${itemsWithIds.length} items from ${files.length} invoice(s).`,
             });
           }
         } catch (error) {
@@ -64,13 +63,13 @@ export default function Home() {
         }
       });
     } else {
-      setPreviewUrl(null);
+      setPreviewUrls([]);
       setInvoiceItems([createEmptyRow()]);
     }
   };
 
   const handleReset = () => {
-    handleFileChange(null);
+    handleFilesChange([]);
     toast({
       title: "Form Cleared",
       description: "Ready for a new invoice.",
@@ -110,7 +109,7 @@ export default function Home() {
             <h2 className="text-xl md:text-2xl font-bold tracking-tight mb-4">Upload Invoice</h2>
             <Card className="h-[calc(100vh-14rem)] shadow-md">
               <CardContent className="p-2 h-full">
-                <InvoiceUploader onFileChange={handleFileChange} previewUrl={previewUrl} />
+                <InvoiceUploader onFilesChange={handleFilesChange} previewUrls={previewUrls} />
               </CardContent>
             </Card>
           </div>

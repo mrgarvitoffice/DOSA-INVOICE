@@ -47,8 +47,9 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40%]">Item Name</TableHead>
-              <TableHead>Qty</TableHead>
+              <TableHead className="w-[50px]">S No.</TableHead>
+              <TableHead className="w-[40%]">Food Item</TableHead>
+              <TableHead>Quantity</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead>Rate</TableHead>
               <TableHead className="text-right">Total</TableHead>
@@ -58,6 +59,7 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
           <TableBody>
             {[...Array(4)].map((_, i) => (
               <TableRow key={i}>
+                <TableCell><Skeleton className="h-8 w-full" /></TableCell>
                 <TableCell><Skeleton className="h-8 w-full" /></TableCell>
                 <TableCell><Skeleton className="h-8 w-full" /></TableCell>
                 <TableCell><Skeleton className="h-8 w-full" /></TableCell>
@@ -77,8 +79,9 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="min-w-[200px] w-auto">Item Name</TableHead>
-            <TableHead className="min-w-[80px] w-[80px]">Qty</TableHead>
+            <TableHead className="w-[50px]">S No.</TableHead>
+            <TableHead className="min-w-[200px] w-auto">Food Item</TableHead>
+            <TableHead className="min-w-[100px] w-[100px]">Quantity</TableHead>
             <TableHead className="min-w-[100px] w-[100px]">Unit</TableHead>
             <TableHead className="min-w-[100px] w-[100px]">Rate</TableHead>
             <TableHead className="text-right min-w-[100px] w-[100px]">Total</TableHead>
@@ -86,17 +89,18 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item) => {
+          {items.map((item, index) => {
             const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
             return (
               <TableRow key={item.id}>
+                <TableCell className="text-center font-medium">{index + 1}</TableCell>
                 <TableCell>
                   <Input
                     type="text"
                     value={item.name}
                     onChange={e => handleItemChange(item.id, 'name', e.target.value)}
                     className="h-8"
-                    aria-label="Item Name"
+                    aria-label="Food Item"
                   />
                 </TableCell>
                 <TableCell>

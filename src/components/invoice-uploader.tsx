@@ -4,13 +4,20 @@ import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { UploadCloud, File as FileIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface InvoiceUploaderProps {
-  onFileChange: (file: File | null) => void;
-  previewUrl: string | null;
+  onFilesChange: (files: File[]) => void;
+  previewUrls: string[];
 }
 
-export default function InvoiceUploader({ onFileChange, previewUrl }: InvoiceUploaderProps) {
+export default function InvoiceUploader({ onFilesChange, previewUrls }: InvoiceUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -27,19 +34,17 @@ export default function InvoiceUploader({ onFileChange, previewUrl }: InvoiceUpl
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      onFileChange(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      onFilesChange(Array.from(e.dataTransfer.files));
     }
-  }, [onFileChange]);
+  }, [onFilesChange]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onFileChange(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      onFilesChange(Array.from(e.target.files));
       e.target.value = ''; // Reset file input
     }
   };
-
-  const isImage = previewUrl && !previewUrl.endsWith('.pdf');
 
   return (
     <div
@@ -50,7 +55,7 @@ export default function InvoiceUploader({ onFileChange, previewUrl }: InvoiceUpl
       className={cn(
         "relative flex h-full w-full items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-4 transition-all duration-300",
         isDragging ? "border-primary bg-primary/10" : "",
-        { "p-0 border-none": previewUrl }
+        { "p-0 border-none": previewUrls.length > 0 }
       )}
     >
       <input
@@ -59,29 +64,47 @@ export default function InvoiceUploader({ onFileChange, previewUrl }: InvoiceUpl
         accept="image/*,.pdf"
         onChange={handleFileSelect}
         className="hidden"
+        multiple
       />
-      {previewUrl ? (
-        <div className="relative w-full h-full">
-            {isImage ? (
-                <Image
-                    src={previewUrl}
-                    alt="Invoice Preview"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    className="rounded-md transition-opacity duration-500 opacity-0 animate-fade-in"
-                />
-            ) : (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                    <FileIcon className="w-24 h-24 mb-4" />
-                    <p className="text-lg font-medium">PDF file uploaded</p>
-                    <p className="text-sm">Preview is not available for PDFs.</p>
-                </div>
-            )}
-        </div>
+      {previewUrls.length > 0 ? (
+        <Carousel className="w-full h-full p-6">
+          <CarouselContent>
+            {previewUrls.map((url, index) => {
+              const isImage = !url.endsWith('.pdf') && !url.startsWith('blob:application/pdf');
+               return (
+                <CarouselItem key={index}>
+                    <div className="relative w-full h-[calc(100vh-18rem)]">
+                        {isImage ? (
+                            <Image
+                                src={url}
+                                alt={`Invoice Preview ${index + 1}`}
+                                fill
+                                style={{ objectFit: 'contain' }}
+                                className="rounded-md transition-opacity duration-500 opacity-0 animate-fade-in"
+                            />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground bg-slate-50 rounded-md">
+                                <FileIcon className="w-24 h-24 mb-4" />
+                                <p className="text-lg font-medium">PDF file uploaded</p>
+                                <p className="text-sm">Preview is not available for PDFs.</p>
+                            </div>
+                        )}
+                    </div>
+                </CarouselItem>
+              )
+            })}
+          </CarouselContent>
+          {previewUrls.length > 1 && (
+            <>
+                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+            </>
+          )}
+        </Carousel>
       ) : (
         <label htmlFor="file-upload" className="flex h-full w-full cursor-pointer flex-col items-center justify-center text-center text-muted-foreground hover:text-primary">
             <UploadCloud className="h-12 w-12 mb-4" />
-            <p className="font-semibold">Drag & drop your invoice here</p>
+            <p className="font-semibold">Drag & drop your invoices here</p>
             <p className="text-sm mt-1">or click to browse</p>
             <p className="text-xs mt-4 text-muted-foreground/80">Supports JPG, PNG, PDF</p>
         </label>
@@ -89,11 +112,3 @@ export default function InvoiceUploader({ onFileChange, previewUrl }: InvoiceUpl
     </div>
   );
 }
-
-// Add fade-in animation to globals.css if it doesn't exist, or tailwind.config
-// For this example, let's assume a utility class or keyframe exists:
-// @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-// .animate-fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
-// tailwind.config.ts should have:
-// keyframes: { 'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } } },
-// animation: { 'fade-in': 'fade-in 0.5s ease-in-out forwards' }

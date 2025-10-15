@@ -9,12 +9,13 @@ export function cn(...inputs: ClassValue[]) {
 export function exportToCsv(items: InvoiceItem[], filename: string) {
   if (!items.length) return;
 
-  const headers = ['Item Name', 'Quantity', 'Unit', 'Rate', 'Total'];
+  const headers = ['S No.', 'Food Item', 'Quantity', 'Unit', 'Rate', 'Total'];
   const filteredItems = items.filter(item => item.name || item.quantity || item.rate);
   
-  const rows = filteredItems.map(item => {
+  const rows = filteredItems.map((item, index) => {
     const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
     return [
+      index + 1,
       `"${item.name.replace(/"/g, '""')}"`,
       item.quantity,
       `"${item.unit.replace(/"/g, '""')}"`,
