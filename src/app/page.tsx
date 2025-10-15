@@ -125,15 +125,18 @@ export default function Home() {
     });
   };
 
-  const triggerFileSelect = () => fileInputRef.current?.click();
+  const triggerFileSelect = () => {
+    // For mobile FAB, there might be a different input ref if you implement that
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader onExport={handleExport} onNewInvoice={handleReset} />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6">
-        <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
+        <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
           
-          <div className="lg:col-span-2 space-y-4 md:sticky md:top-20 md:self-start">
+          <div className="lg:col-span-2 space-y-4 lg:sticky lg:top-20">
             <div className="flex items-center justify-between">
               <h2 className="text-xl md:text-2xl font-bold tracking-tight">Upload Invoice</h2>
               {previewUrls.length > 0 && (
@@ -190,15 +193,20 @@ export default function Home() {
             <input
               type="file"
               accept="image/*,.pdf"
-              onChange={(e) => e.target.files && handleFilesChange(Array.from(e.target.files))}
+              onChange={(e) => {
+                  if (e.target.files) {
+                    handleFilesChange(Array.from(e.target.files));
+                    e.target.value = ''; // Reset file input
+                  }
+              }}
               className="hidden"
-              ref={fileInputRef}
+              id="mobile-file-upload"
               multiple
             />
             <Button
               size="lg"
               className="rounded-full shadow-xl w-16 h-16"
-              onClick={triggerFileSelect}
+              onClick={() => document.getElementById('mobile-file-upload')?.click()}
               aria-label="Upload invoice"
             >
               <FileUp className="h-6 w-6" />
