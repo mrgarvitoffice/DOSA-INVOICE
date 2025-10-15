@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -22,13 +21,25 @@ export type InvoiceInput = z.infer<typeof InvoiceInputSchema>;
 
 const InvoiceOutputSchema = z.object({
   items: z.array(z.object({
-    name: z.string(),
-    quantity: z.number(),
-    unit: z.string(),
-    rate: z.number(),
-  }))
+    name: z.string().describe("The name of the item on the invoice."),
+    quantity: z.number().describe("The quantity of the item."),
+    unit: z.string().describe("The unit of measurement for the quantity (e.g., pcs, kg, cup)."),
+    rate: z.number().describe("The rate or price per unit of the item."),
+  })).describe("An array of line items extracted from the invoice."),
 });
 export type InvoiceOutput = z.infer<typeof InvoiceOutputSchema>;
+
+
+const extractionPrompt = ai.definePrompt({
+    name: 'invoiceExtractionPrompt',
+    input: { schema: InvoiceInputSchema },
+    output: { schema: InvoiceOutputSchema },
+    prompt: `You are an expert at extracting structured data from documents.
+    Extract the line items from the provided invoice file.
+    
+    Invoice: {{media url=(concat "data:" file.contentType ";base64," (toBase64 file.content))}}
+    `,
+});
 
 
 const extractFromInvoiceFlow = ai.defineFlow(
@@ -38,18 +49,8 @@ const extractFromInvoiceFlow = ai.defineFlow(
     outputSchema: InvoiceOutputSchema,
   },
   async (input) => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    console.log(`Simulating OCR for file of type: ${input.file.contentType}`);
-    
-    return {
-      items: [
-        { name: 'Plain Dosa', quantity: 2, unit: 'pcs', rate: 80 },
-        { name: 'Masala Dosa', quantity: 1, unit: 'pcs', rate: 100 },
-        { name: 'Filter Coffee', quantity: 3, unit: 'cup', rate: 40 },
-        { name: 'Mineral Water', quantity: 1, unit: 'btl', rate: 20 },
-      ]
-    };
+    const { output } = await extractionPrompt(input);
+    return output!;
   }
 );
 
