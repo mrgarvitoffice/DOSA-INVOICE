@@ -40,8 +40,8 @@ export async function extractInvoiceData(formData: FormData): Promise<{ data?: E
     }));
     
     return { data: parsedData };
-  } catch (e) {
-    console.error('Error in OCR extraction:', e);
-    return { error: 'An unexpected error occurred during OCR processing.' };
+  } catch (e: any) {
+    console.error('Error in extraction flow:', e);
+    return { error: e.message || 'An unexpected error occurred during invoice processing.' };
   }
 }
