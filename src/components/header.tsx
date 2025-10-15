@@ -21,25 +21,27 @@ export default function AppHeader({ onSaveToSheet, onNewInvoice }: AppHeaderProp
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onNewInvoice}
-              aria-label="Start new invoice"
-            >
-              <FileX2 className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">New Invoice</span>
-            </Button>
-            <Button
-              onClick={onSaveToSheet}
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              aria-label="Save to Google Sheet"
-            >
-              <Sheet className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Save to Sheet</span>
-            </Button>
-            <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block" />
+            <div className="hidden lg:flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onNewInvoice}
+                aria-label="Start new invoice"
+              >
+                <FileX2 className="mr-2 h-4 w-4" />
+                <span>New Invoice</span>
+              </Button>
+              <Button
+                onClick={onSaveToSheet}
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                aria-label="Save to Google Sheet"
+              >
+                <Sheet className="mr-2 h-4 w-4" />
+                <span>Save to Sheet</span>
+              </Button>
+              <Separator orientation="vertical" className="h-6 mx-1" />
+            </div>
             <ThemeSwitcher />
           </div>
         </div>
