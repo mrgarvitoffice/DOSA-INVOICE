@@ -176,7 +176,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader onSaveToSheet={handleSaveToSheet} onNewInvoice={handleReset} onExportToCsv={handleExportToCsv} />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:pb-8 pb-28">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:pb-8 pb-24">
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
           
           <div className="lg:col-span-2 space-y-4 lg:sticky lg:top-20">

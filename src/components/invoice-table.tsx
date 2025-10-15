@@ -122,8 +122,6 @@ function DesktopInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProp
     )
   }
 
-  const hasHeadings = items.some(item => item.isHeading);
-
   let serialNumber = 0;
 
   return (
@@ -141,8 +139,9 @@ function DesktopInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProp
             </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item) => {
+          {items.map((item, index) => {
             if (item.isHeading) {
+              serialNumber = 0; // Reset for new section
               return (
                 <TableRow key={item.id} className="hover:bg-transparent -mt-px">
                   <TableCell colSpan={7} className="p-2 font-semibold bg-muted/50">
@@ -169,7 +168,13 @@ function DesktopInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProp
               )
             }
             
-            serialNumber++;
+            // Check if previous item was a heading to restart numbering
+            if (index === 0 || items[index - 1]?.isHeading) {
+              serialNumber = 1;
+            } else {
+              serialNumber++;
+            }
+
             const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
             return (
               <TableRow key={item.id}>
@@ -302,10 +307,10 @@ function MobileInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps
   return (
     <div className="overflow-auto p-2">
       <Accordion type="multiple" className="space-y-3">
-        {items.map((item) => {
+        {items.map((item, index) => {
           if (item.isHeading) {
             return (
-              <div key={item.id} className="p-2 border-b">
+              <div key={item.id} className="p-2 border-b flex items-center justify-between">
                  <Input
                     type="text"
                     value={item.name}
@@ -313,11 +318,24 @@ function MobileInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps
                     className="h-9 text-base font-bold tracking-tight border-0 bg-transparent focus-visible:ring-1"
                     aria-label="Section Heading"
                   />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteRow(item.id)}
+                    className="h-8 w-8 flex-shrink-0 text-destructive hover:text-destructive"
+                    aria-label="Delete heading"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
               </div>
             );
           }
 
-          serialNumber++;
+          if (index === 0 || items[index - 1]?.isHeading) {
+            serialNumber = 1;
+          } else {
+            serialNumber++;
+          }
           const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
 
           return (
