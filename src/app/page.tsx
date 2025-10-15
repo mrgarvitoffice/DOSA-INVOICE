@@ -223,7 +223,7 @@ export default function Home() {
              </div>
             <Card className="shadow-lg lg:max-h-[calc(100vh-12rem)] overflow-hidden">
               <CardContent className="p-0 h-full">
-                <div className="h-full overflow-auto">
+                <div className="h-full">
                   <InvoiceTable 
                     items={invoiceItems} 
                     setItems={setInvoiceItems}
@@ -277,5 +277,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

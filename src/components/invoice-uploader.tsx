@@ -133,5 +133,3 @@ export default function InvoiceUploader({ onFilesChange, previewUrls, isProcessi
     </div>
   );
 }
-
-    
