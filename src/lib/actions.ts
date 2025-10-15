@@ -1,13 +1,7 @@
 'use server';
 
 import { extractInvoice } from '@/ai/flows/invoice-extractor';
-
-interface ExtractedItemData {
-  name: string;
-  quantity: number;
-  unit: string;
-  rate: number;
-}
+import type { ExtractedItemData } from './definitions';
 
 export async function extractInvoiceData(formData: FormData): Promise<{ data?: ExtractedItemData[]; error?: string }> {
   const files = formData.getAll('invoices') as File[];
@@ -30,6 +24,7 @@ export async function extractInvoiceData(formData: FormData): Promise<{ data?: E
 
       if (result && Array.isArray(result.items)) {
         const parsedData = result.items.map((item: any) => ({
+            isHeading: !!item.isHeading,
             name: String(item.name || ''),
             quantity: parseFloat(item.quantity) || 0,
             unit: String(item.unit || ''),

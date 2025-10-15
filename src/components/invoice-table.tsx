@@ -17,6 +17,7 @@ interface InvoiceTableProps {
 
 const createEmptyRow = (): InvoiceItem => ({
   id: crypto.randomUUID(),
+  isHeading: false,
   name: '',
   quantity: 1,
   unit: '',
@@ -25,7 +26,7 @@ const createEmptyRow = (): InvoiceItem => ({
 
 export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps) {
   
-  const handleItemChange = (id: string, field: keyof Omit<InvoiceItem, 'id'>, value: string | number) => {
+  const handleItemChange = (id: string, field: keyof Omit<InvoiceItem, 'id' | 'isHeading'>, value: string | number) => {
     setItems(prevItems =>
       prevItems.map(item =>
         item.id === id ? { ...item, [field]: value } : item
@@ -38,7 +39,14 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
   };
 
   const deleteRow = (id: string) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== id));
+    setItems(prevItems => {
+        const newItems = prevItems.filter(item => item.id !== id);
+        // If all rows are deleted, add a new empty one
+        if (newItems.length === 0) {
+            return [createEmptyRow()];
+        }
+        return newItems;
+    });
   };
   
   if (isProcessing) {
@@ -74,6 +82,8 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
     )
   }
 
+  let serialNumber = 0;
+
   return (
     <div className="overflow-auto">
       <Table>
@@ -89,11 +99,41 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item, index) => {
+          {items.map((item) => {
+            if (item.isHeading) {
+              return (
+                <TableRow key={item.id} className="bg-muted/50">
+                  <TableCell colSpan={6} className="py-2">
+                    <div className="flex items-center justify-between">
+                      <Input
+                        type="text"
+                        value={item.name}
+                        onChange={e => handleItemChange(item.id, 'name', e.target.value)}
+                        className="h-8 font-semibold text-base border-0 bg-transparent focus-visible:ring-0"
+                        aria-label="Section Heading"
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteRow(item.id)}
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      aria-label="Delete heading"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            }
+
+            serialNumber++;
             const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
             return (
               <TableRow key={item.id}>
-                <TableCell className="text-center font-medium">{index + 1}</TableCell>
+                <TableCell className="text-center font-medium">{serialNumber}</TableCell>
                 <TableCell>
                   <Input
                     type="text"
@@ -138,11 +178,7 @@ export default function InvoiceTable({ items, setItems, isProcessing }: InvoiceT
                     variant="ghost"
                     size="icon"
                     onClick={() => deleteRow(item.id)}
-                    disabled={items.length <= 1}
-                    className={cn("h-8 w-8", {
-                        "text-destructive hover:text-destructive": items.length > 1,
-                        "text-muted-foreground cursor-not-allowed": items.length <= 1
-                    })}
+                    className="h-8 w-8 text-destructive hover:text-destructive"
                     aria-label="Delete row"
                   >
                     <Trash2 className="h-4 w-4" />
