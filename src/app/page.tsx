@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useTransition, useRef } from 'react';
@@ -9,7 +8,7 @@ import InvoiceUploader from '@/components/invoice-uploader';
 import InvoiceTable from '@/components/invoice-table';
 import AppHeader from '@/components/header';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, FileUp } from "lucide-react";
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -58,7 +57,6 @@ export default function Home() {
           
           if (append) {
             setInvoiceItems(prevItems => {
-              // Filter out the initial empty row if it's the only thing present
               const existingItems = prevItems.length === 1 && !prevItems[0].name ? [] : prevItems;
               return [...existingItems, ...itemsWithIds];
             });
@@ -127,13 +125,16 @@ export default function Home() {
     });
   };
 
+  const triggerFileSelect = () => fileInputRef.current?.click();
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader onExport={handleExport} onNewInvoice={handleReset} />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6">
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
-          <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
+          
+          <div className="lg:col-span-2 space-y-4 md:sticky md:top-20 md:self-start">
+            <div className="flex items-center justify-between">
               <h2 className="text-xl md:text-2xl font-bold tracking-tight">Upload Invoice</h2>
               {previewUrls.length > 0 && (
                 <>
@@ -148,7 +149,7 @@ export default function Home() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={triggerFileSelect}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Upload More
@@ -156,21 +157,23 @@ export default function Home() {
                 </>
               )}
             </div>
-            <Card className="h-[calc(100vh-16rem)] shadow-md">
-              <CardContent className="p-2 h-full">
+            <Card className="shadow-lg h-auto">
+              <CardContent className="p-2">
                 <InvoiceUploader 
                   onFilesChange={handleFilesChange} 
-                  previewUrls={previewUrls.map(item => item.url)} 
+                  previewUrls={previewUrls.map(item => item.url)}
+                  isProcessing={isExtracting}
                 />
               </CardContent>
             </Card>
           </div>
+
           <div className="lg:col-span-3">
              <div className="flex items-center justify-between mb-4 h-9">
                <h2 className="text-xl md:text-2xl font-bold tracking-tight">Extracted Data</h2>
                {isExtracting && <Loader2 className="animate-spin text-primary" />}
              </div>
-            <Card className="shadow-md">
+            <Card className="shadow-lg">
               <CardContent className="p-0">
                 <InvoiceTable 
                   items={invoiceItems} 
@@ -181,6 +184,26 @@ export default function Home() {
             </Card>
           </div>
         </div>
+
+        {/* Floating Action Button for Mobile */}
+        <div className="lg:hidden fixed bottom-4 right-4 z-50">
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) => e.target.files && handleFilesChange(Array.from(e.target.files))}
+              className="hidden"
+              ref={fileInputRef}
+              multiple
+            />
+            <Button
+              size="lg"
+              className="rounded-full shadow-xl w-16 h-16"
+              onClick={triggerFileSelect}
+              aria-label="Upload invoice"
+            >
+              <FileUp className="h-6 w-6" />
+            </Button>
+          </div>
       </main>
     </div>
   );
