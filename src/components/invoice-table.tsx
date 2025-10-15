@@ -91,7 +91,7 @@ function DesktopInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProp
   
   if (isProcessing) {
     return (
-      <div className="overflow-auto">
+      <div className="h-full overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -125,116 +125,118 @@ function DesktopInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProp
   let serialNumber = 0;
 
   return (
-    <div className="overflow-auto">
-      <Table>
-         <TableHeader>
-            <TableRow>
-                <TableHead className="w-[50px]">S No.</TableHead>
-                <TableHead className="min-w-[200px] w-auto">Food Item</TableHead>
-                <TableHead className="min-w-[100px] w-[100px]">Quantity</TableHead>
-                <TableHead className="min-w-[100px] w-[100px]">Unit</TableHead>
-                <TableHead className="min-w-[100px] w-[100px]">Rate</TableHead>
-                <TableHead className="text-right min-w-[100px] w-[100px]">Total</TableHead>
-                <TableHead className="w-10" aria-label="Actions"></TableHead>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item, index) => {
-            if (item.isHeading) {
-              serialNumber = 0; // Reset for new section
-              return (
-                <TableRow key={item.id} className="hover:bg-transparent -mt-px">
-                  <TableCell colSpan={7} className="p-2 font-semibold bg-muted/50">
-                     <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col">
+        <div className="flex-grow overflow-auto">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                    <TableHead className="w-[50px]">S No.</TableHead>
+                    <TableHead className="min-w-[200px] w-auto">Food Item</TableHead>
+                    <TableHead className="min-w-[100px] w-[100px]">Quantity</TableHead>
+                    <TableHead className="min-w-[100px] w-[100px]">Unit</TableHead>
+                    <TableHead className="min-w-[100px] w-[100px]">Rate</TableHead>
+                    <TableHead className="text-right min-w-[100px] w-[100px]">Total</TableHead>
+                    <TableHead className="w-10" aria-label="Actions"></TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item, index) => {
+                if (item.isHeading) {
+                  serialNumber = 0; // Reset for new section
+                  return (
+                    <TableRow key={item.id} className="hover:bg-transparent -mt-px">
+                      <TableCell colSpan={7} className="p-2 font-semibold bg-muted/50 sticky top-[calc(theme(spacing.12)+1px)] z-10">
+                        <div className="flex items-center justify-between">
+                          <Input
+                            type="text"
+                            value={item.name}
+                            onChange={e => handleItemChange(item.id, 'name', e.target.value)}
+                            className="h-9 text-base font-bold tracking-tight border-0 bg-transparent focus-visible:ring-1"
+                            aria-label="Section Heading"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteRow(item.id)}
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            aria-label="Delete heading"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+                
+                // Check if previous item was a heading to restart numbering
+                if (index === 0 || items[index - 1]?.isHeading) {
+                  serialNumber = 1;
+                } else {
+                  serialNumber++;
+                }
+
+                const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell className="text-center font-medium">{serialNumber}</TableCell>
+                    <TableCell>
                       <Input
                         type="text"
                         value={item.name}
                         onChange={e => handleItemChange(item.id, 'name', e.target.value)}
-                        className="h-9 text-base font-bold tracking-tight border-0 bg-transparent focus-visible:ring-1"
-                        aria-label="Section Heading"
+                        className="h-8"
+                        aria-label="Food Item"
                       />
-                       <Button
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={item.quantity}
+                        onChange={e => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                        className="h-8"
+                        aria-label="Quantity"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="text"
+                        value={item.unit}
+                        onChange={e => handleItemChange(item.id, 'unit', e.target.value)}
+                        className="h-8"
+                        aria-label="Unit"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={item.rate}
+                        onChange={e => handleItemChange(item.id, 'rate', parseFloat(e.target.value) || 0)}
+                        className="h-8"
+                        aria-label="Rate"
+                      />
+                    </TableCell>
+                    <TableCell className="text-right font-medium" aria-label="Total">
+                      {total.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => deleteRow(item.id)}
                         className="h-8 w-8 text-destructive hover:text-destructive"
-                        aria-label="Delete heading"
+                        aria-label="Delete row"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            }
-            
-            // Check if previous item was a heading to restart numbering
-            if (index === 0 || items[index - 1]?.isHeading) {
-              serialNumber = 1;
-            } else {
-              serialNumber++;
-            }
-
-            const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
-            return (
-              <TableRow key={item.id}>
-                <TableCell className="text-center font-medium">{serialNumber}</TableCell>
-                <TableCell>
-                  <Input
-                    type="text"
-                    value={item.name}
-                    onChange={e => handleItemChange(item.id, 'name', e.target.value)}
-                    className="h-8"
-                    aria-label="Food Item"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    value={item.quantity}
-                    onChange={e => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                    className="h-8"
-                    aria-label="Quantity"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="text"
-                    value={item.unit}
-                    onChange={e => handleItemChange(item.id, 'unit', e.target.value)}
-                    className="h-8"
-                    aria-label="Unit"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    value={item.rate}
-                    onChange={e => handleItemChange(item.id, 'rate', parseFloat(e.target.value) || 0)}
-                    className="h-8"
-                    aria-label="Rate"
-                  />
-                </TableCell>
-                <TableCell className="text-right font-medium" aria-label="Total">
-                  {total.toFixed(2)}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteRow(item.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    aria-label="Delete row"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-      <div className="p-4 border-t flex items-center gap-2">
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+      </div>
+      <div className="p-4 border-t flex items-center gap-2 flex-shrink-0">
         <Button variant="outline" size="sm" onClick={() => addNewRow()}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Row
@@ -396,5 +398,7 @@ function MobileInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps
     </div>
   );
 }
+
+    
 
     

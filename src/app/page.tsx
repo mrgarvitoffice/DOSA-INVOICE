@@ -219,21 +219,19 @@ export default function Home() {
             </Card>
           </div>
 
-          <div className="lg:col-span-3">
-             <div className="flex items-center justify-between mb-4 h-9">
+          <div className="lg:col-span-3 flex flex-col h-full">
+             <div className="flex items-center justify-between mb-4 h-9 flex-shrink-0">
                <h2 className="text-xl md:text-2xl font-bold tracking-tight">Extracted Data</h2>
                {(isExtracting || isSaving) && <Loader2 className="animate-spin text-primary" />}
              </div>
-            <Card className="shadow-lg lg:max-h-[calc(100vh-12rem)] overflow-hidden">
-              <CardContent className="p-0 h-full">
-                <div className="h-full">
+            <Card className="shadow-lg flex-grow lg:max-h-[calc(100vh-12rem)] overflow-hidden">
+                <div className="h-full lg:overflow-y-auto">
                   <InvoiceTable 
                     items={invoiceItems} 
                     setItems={setInvoiceItems}
                     isProcessing={isExtracting}
                   />
                 </div>
-              </CardContent>
             </Card>
           </div>
         </div>
@@ -263,3 +261,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
