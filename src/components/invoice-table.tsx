@@ -305,8 +305,8 @@ function MobileInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps
   let serialNumber = 0;
 
   return (
-    <div className="overflow-auto p-2">
-      <Accordion type="multiple" className="space-y-3">
+    <div className="p-2">
+      <Accordion type="multiple" className="w-full space-y-3">
         {items.map((item, index) => {
           if (item.isHeading) {
             return (
@@ -396,3 +396,5 @@ function MobileInvoiceTable({ items, setItems, isProcessing }: InvoiceTableProps
     </div>
   );
 }
+
+    
