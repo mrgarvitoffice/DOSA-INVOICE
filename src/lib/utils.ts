@@ -8,7 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 
 function escapeCsvCell(cellData: any): string {
   const stringData = String(cellData ?? '').replace(/"/g, '""');
-  // Enclose in quotes if it contains a comma, a quote, or a newline
   if (/[",\n]/.test(stringData)) {
     return `"${stringData}"`;
   }
@@ -18,35 +17,49 @@ function escapeCsvCell(cellData: any): string {
 export function exportToCsv(items: InvoiceItem[], filename: string) {
   if (!items.length) return;
 
-  // Add "TOTAL" as a bold header. The actual styling happens in Excel,
-  // but using uppercase convention helps.
-  const headers = ['"S No."', '"Food Item"', '"Quantity"', '"Unit"', '"Rate"', '"TOTAL"'];
+  const headers = ['S No.', 'Food Item', 'Quantity', 'Unit', 'Rate', 'Total'];
+  const csvRows: string[] = [];
   
   let serialNumber = 0;
-  const rows = items.map(item => {
+  let isFirstGroup = true;
+
+  items.forEach((item, index) => {
     if (item.isHeading) {
-      // For headings, merge cells and make it stand out.
-      // We create a row where the first cell contains the heading, and the rest are empty.
-      return [escapeCsvCell(item.name.toUpperCase()), '', '', '', '', ''].join(',');
-    }
-    
-    if (!item.name && !item.quantity && !item.rate) {
-        return null; // Skip empty/placeholder rows
-    }
+      // Add space before a new heading, except for the very first item
+      if (index > 0) {
+        csvRows.push(''); // Add an empty row for spacing
+      }
+      // Add heading row, merged across columns (visually in Excel)
+      csvRows.push(`"${item.name.toUpperCase()}"`);
+      csvRows.push(headers.join(','));
+      serialNumber = 0; // Reset serial number for each new section
+      isFirstGroup = false;
+    } else {
+       if (isFirstGroup && index === 0) {
+         csvRows.push(headers.join(','));
+         isFirstGroup = false;
+       }
 
-    serialNumber++;
-    const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
-    return [
-      serialNumber,
-      escapeCsvCell(item.name),
-      item.quantity || '',
-      escapeCsvCell(item.unit),
-      item.rate || '',
-      total > 0 ? total.toFixed(2) : ''
-    ].join(',');
-  }).filter(Boolean); // filter(Boolean) removes null entries
+      if (!item.name && !item.quantity && !item.rate) {
+          return; // Skip empty/placeholder rows
+      }
 
-  const csvContent = [headers.join(','), ...rows].join('\n');
+      serialNumber++;
+      const total = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
+      const row = [
+        serialNumber,
+        escapeCsvCell(item.name),
+        item.quantity || '',
+        escapeCsvCell(item.unit),
+        item.rate || '',
+        total > 0 ? total.toFixed(2) : ''
+      ].join(',');
+      csvRows.push(row);
+    }
+  });
+
+
+  const csvContent = csvRows.join('\n');
   const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF for BOM
   const link = document.createElement("a");
   
