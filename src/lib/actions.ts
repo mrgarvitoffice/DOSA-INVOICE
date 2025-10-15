@@ -17,13 +17,13 @@ export async function extractInvoiceData(formData: FormData): Promise<{ data?: E
     return { error: 'No invoice file provided.' };
   }
 
-  // Genkit flows can often take file content as a Buffer.
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  const fileBuffer = await file.arrayBuffer();
+  const fileContentBase64 = Buffer.from(fileBuffer).toString('base64');
 
   try {
     const result = await extractInvoice({
       file: {
-        content: fileBuffer,
+        content: fileContentBase64,
         contentType: file.type,
       },
     });

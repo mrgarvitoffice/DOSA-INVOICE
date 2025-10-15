@@ -13,7 +13,7 @@ import { z } from 'zod';
 
 const InvoiceInputSchema = z.object({
   file: z.object({
-    content: z.any().describe("A file buffer of the invoice."),
+    content: z.string().describe("A Base64 encoded string of the invoice file content."),
     contentType: z.string().describe("The MIME type of the invoice file."),
   }),
 });
@@ -37,7 +37,7 @@ const extractionPrompt = ai.definePrompt({
     prompt: `You are an expert at extracting structured data from documents.
     Extract the line items from the provided invoice file.
     
-    Invoice: {{media url=(concat "data:" file.contentType ";base64," (toBase64 file.content))}}
+    Invoice: {{media url=(concat "data:" file.contentType ";base64," file.content)}}
     `,
 });
 
